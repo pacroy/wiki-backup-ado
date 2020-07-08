@@ -1,0 +1,56 @@
+parameters:
+- name: kubeContext
+  type: string
+- name: kubeNamespace
+  type: string
+- name: mysqlAppLabel
+  type: string
+- name: bookstackAppLabel
+  type: string
+
+jobs:
+- job: 'backup'
+  displayName: 'Backup Wiki'
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+  - checkout: none
+  - task: Bash@3
+    displayName: 'Check Variables'
+    inputs:
+      failOnStderr: true
+      noProfile: true
+      noRc: true
+      targetType: 'inline'
+      script: |
+        [ -z "$(kubeContext)" ] && echo 'Variable "kubeContext" is not set' && exit 1
+        [ -z "$(kubeNamespace)" ] && echo 'Variable "kubeNamespace" is not set' && exit 1
+        [ -z "$(mysqlAppLabel)" ] && echo 'Variable "mysqlAppLabel" is not set' && exit 1
+        [ -z "$(bookstackAppLabel)" ] && echo 'Variable "bookstackAppLabel" is not set' && exit 1
+  - task: Bash@3
+    displayName: 'Tool Information'
+    inputs:
+      failOnStderr: false
+      noProfile: true
+      noRc: true
+      targetType: 'inline'
+      script: |
+        command -v az
+        az version
+        command -v kubectl
+        kubectl version --client=true
+  - task: Bash@3
+    displayName: 'Backup'
+    inputs:
+      failOnStderr: true
+      noProfile: true
+      noRc: true
+      targetType: 'inline'
+      script: |
+        export KUBE_CONTEXT=$(kubeContext)
+        export WIKI_NAMSPACE=$(kubeNamespace)
+        export MYSQL_APP_LABEL=$(mysqlAppLabel)
+        export BOOKSTACK_APP_LABEL=$(bookstackAppLabel)
+
+        # Execute
+        bash -e <(curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh)
