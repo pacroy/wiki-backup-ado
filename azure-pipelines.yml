@@ -1,13 +1,3 @@
-variables:
-- name: kubeContext
-  value: ''
-- name: kubeNamespace
-  value: ''
-- name: mysqlAppLabel
-  value: ''
-- name: bookstackAppLabel
-  value: ''
-
 jobs:
 - job: 'backup'
   displayName: 'Backup Wiki'
@@ -23,10 +13,10 @@ jobs:
       noRc: true
       targetType: 'inline'
       script: |
-        [ -z "$(variables.kubeContext)" ] && echo 'Variable "kubeContext" is not set' && exit 1
-        [ -z "$(variables.kubeNamespace)" ] && echo 'Variable "kubeNamespace" is not set' && exit 1
-        [ -z "$(variables.mysqlAppLabel)" ] && echo 'Variable "mysqlAppLabel" is not set' && exit 1
-        [ -z "$(variables.bookstackAppLabel)" ] && echo 'Variable "bookstackAppLabel" is not set' && exit 1
+        [ -z "$KUBE_CONTEXT" ] && echo 'Variable "KUBE_CONTEXT" is not set' && exit 1
+        [ -z "$WIKI_NAMSPACE" ] && echo 'Variable "WIKI_NAMSPACE" is not set' && exit 1
+        [ -z "$MYSQL_APP_LABEL" ] && echo 'Variable "MYSQL_APP_LABEL" is not set' && exit 1
+        [ -z "$BOOKSTACK_APP_LABEL" ] && echo 'Variable "BOOKSTACK_APP_LABEL" is not set' && exit 1
   - task: Bash@3
     displayName: 'Tool Information'
     inputs:
@@ -47,10 +37,4 @@ jobs:
       noRc: true
       targetType: 'inline'
       script: |
-        export KUBE_CONTEXT=$(variables.kubeContext)
-        export WIKI_NAMSPACE=$(variables.kubeNamespace)
-        export MYSQL_APP_LABEL=$(variables.mysqlAppLabel)
-        export BOOKSTACK_APP_LABEL=$(variables.bookstackAppLabel)
-
-        # Execute
         bash -e <(curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh)
