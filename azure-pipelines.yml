@@ -6,11 +6,9 @@ jobs:
   steps:
   - checkout: none
   - task: Bash@3
-    displayName: 'Check Variables'
+    displayName: 'Check Pipeline Variables'
     inputs:
       failOnStderr: true
-      noProfile: true
-      noRc: true
       targetType: 'inline'
       script: |
         if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
@@ -18,11 +16,9 @@ jobs:
         if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
         if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
   - task: Bash@3
-    displayName: 'Tool Information'
+    displayName: 'Print Tool Version'
     inputs:
       failOnStderr: false
-      noProfile: true
-      noRc: true
       targetType: 'inline'
       script: |
         command -v az
@@ -30,11 +26,14 @@ jobs:
         command -v kubectl
         kubectl version --client=true
   - task: Bash@3
-    displayName: 'Backup'
+    displayName: 'Download Backup Script'
     inputs:
       failOnStderr: true
-      noProfile: true
-      noRc: true
       targetType: 'inline'
-      script: |
-        bash -e <(curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh)
+      script: curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+  - task: Bash@3
+    displayName: 'Execute Backup Script'
+    inputs:
+      failOnStderr: true
+      targetType: 'filePath'
+      filePath: backup.sh
