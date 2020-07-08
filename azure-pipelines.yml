@@ -16,17 +16,17 @@ jobs:
   steps:
   - checkout: none
   - task: Bash@3
-    displayName: 'Check Variables'
+    displayName: 'Check Parameters'
     inputs:
       failOnStderr: true
       noProfile: true
       noRc: true
       targetType: 'inline'
       script: |
-        [ -z "$(kubeContext)" ] && echo 'Variable "kubeContext" is not set' && exit 1
-        [ -z "$(kubeNamespace)" ] && echo 'Variable "kubeNamespace" is not set' && exit 1
-        [ -z "$(mysqlAppLabel)" ] && echo 'Variable "mysqlAppLabel" is not set' && exit 1
-        [ -z "$(bookstackAppLabel)" ] && echo 'Variable "bookstackAppLabel" is not set' && exit 1
+        [ -z "$(parameters.kubeContext)" ] && echo 'Parameter "kubeContext" is not set' && exit 1
+        [ -z "$(parameters.kubeNamespace)" ] && echo 'Parameter "kubeNamespace" is not set' && exit 1
+        [ -z "$(parameters.mysqlAppLabel)" ] && echo 'Parameter "mysqlAppLabel" is not set' && exit 1
+        [ -z "$(parameters.bookstackAppLabel)" ] && echo 'Parameter "bookstackAppLabel" is not set' && exit 1
   - task: Bash@3
     displayName: 'Tool Information'
     inputs:
@@ -47,10 +47,10 @@ jobs:
       noRc: true
       targetType: 'inline'
       script: |
-        export KUBE_CONTEXT=$(kubeContext)
-        export WIKI_NAMSPACE=$(kubeNamespace)
-        export MYSQL_APP_LABEL=$(mysqlAppLabel)
-        export BOOKSTACK_APP_LABEL=$(bookstackAppLabel)
+        export KUBE_CONTEXT=$(parameters.kubeContext)
+        export WIKI_NAMSPACE=$(parameters.kubeNamespace)
+        export MYSQL_APP_LABEL=$(parameters.mysqlAppLabel)
+        export BOOKSTACK_APP_LABEL=$(parameters.bookstackAppLabel)
 
         # Execute
         bash -e <(curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh)
