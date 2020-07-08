@@ -13,10 +13,10 @@ jobs:
       noRc: true
       targetType: 'inline'
       script: |
-        [ -z "$KUBE_CONTEXT" ] && echo 'Variable "KUBE_CONTEXT" is not set' && exit 1
-        [ -z "$WIKI_NAMSPACE" ] && echo 'Variable "WIKI_NAMSPACE" is not set' && exit 1
-        [ -z "$MYSQL_APP_LABEL" ] && echo 'Variable "MYSQL_APP_LABEL" is not set' && exit 1
-        [ -z "$BOOKSTACK_APP_LABEL" ] && echo 'Variable "BOOKSTACK_APP_LABEL" is not set' && exit 1
+        [ -z "$KUBE_CONTEXT" ] && >&2 echo 'Variable "KUBE_CONTEXT" is not set'
+        [ -z "$WIKI_NAMSPACE" ] && >&2 echo 'Variable "WIKI_NAMSPACE" is not set'
+        [ -z "$MYSQL_APP_LABEL" ] && >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'
+        [ -z "$BOOKSTACK_APP_LABEL" ] && >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'
   - task: Bash@3
     displayName: 'Tool Information'
     inputs:
