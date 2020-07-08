@@ -14,9 +14,9 @@ jobs:
       targetType: 'inline'
       script: |
         if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
-        if [ -z "$WIKI_NAMSPACE" ] then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
-        if [ -z "$MYSQL_APP_LABEL" ] then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
-        if [ -z "$BOOKSTACK_APP_LABEL" ] then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
+        if [ -z "$WIKI_NAMSPACE" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
+        if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
+        if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
   - task: Bash@3
     displayName: 'Tool Information'
     inputs:
