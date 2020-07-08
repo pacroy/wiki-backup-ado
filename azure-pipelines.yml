@@ -17,6 +17,7 @@ jobs:
         [ -z "$WIKI_NAMSPACE" ] && >&2 echo 'Variable "WIKI_NAMSPACE" is not set'
         [ -z "$MYSQL_APP_LABEL" ] && >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'
         [ -z "$BOOKSTACK_APP_LABEL" ] && >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'
+        exit
   - task: Bash@3
     displayName: 'Tool Information'
     inputs:
