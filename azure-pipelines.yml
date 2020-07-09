@@ -11,6 +11,8 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
+        if [ -z "$AKS_RESOURCE_GROUP" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
+        if [ -z "$AKS_CLUSTER_NAME" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
         if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
         if [ -z "$WIKI_NAMSPACE" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
         if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
@@ -31,6 +33,15 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+  - task: AzureCLI@2
+    displayName: 'Get AKS Credential'
+    inputs:
+      azureSubscription: 'par-shared-002(99813d40-928b-44b2-a969-2c7ea5bd8b96)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      failOnStandardError: true
+      useGlobalConfig: true
+      inlineScript: az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
