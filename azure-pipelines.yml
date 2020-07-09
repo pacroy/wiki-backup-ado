@@ -66,20 +66,20 @@ jobs:
       script: |
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
-          --container-name $(BLOB_CONTAINER_NAME) \
+          --container-name '$(BLOB_CONTAINER_NAME)' \
           --file 'backup/bookstack.sql' \
           --name "$BLOB_PREFIX/bookstack.sql" \
-          --account-name $(STORAGE_ACCOUNT_NAME) \
-          --account-key $(STORAGE_ACCOUNT_KEY)
+          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-key '$(STORAGE_ACCOUNT_KEY)'
         az storage blob upload \
-          --container-name $(BLOB_CONTAINER_NAME) \
+          --container-name '$(BLOB_CONTAINER_NAME)' \
           --file 'backup/uploads.tgz' \
           --name "$BLOB_PREFIX/uploads.tgz" \
-          --account-name $(STORAGE_ACCOUNT_NAME) \
-          --account-key $(STORAGE_ACCOUNT_KEY)
+          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-key '$(STORAGE_ACCOUNT_KEY)'
         az storage blob upload \
-          --container-name $(BLOB_CONTAINER_NAME) \
+          --container-name '$(BLOB_CONTAINER_NAME)' \
           --file 'backup/storage.tgz' \
           --name "$BLOB_PREFIX/storage.tgz" \
-          --account-name $(STORAGE_ACCOUNT_NAME) \
-          --account-key $(STORAGE_ACCOUNT_KEY)
+          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-key '$(STORAGE_ACCOUNT_KEY)'
