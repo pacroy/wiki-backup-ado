@@ -19,7 +19,6 @@ jobs:
         if [ -z "$(BOOKSTACK_APP_LABEL)" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
         if [ -z "$(BLOB_CONTAINER_NAME)" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
         if [ -z "$(STORAGE_ACCOUNT_NAME)" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
-        if [ -z "$(STORAGE_ACCOUNT_KEY)" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_KEY" is not set'; fi
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
@@ -70,16 +69,16 @@ jobs:
           --file 'backup/bookstack.sql' \
           --name "$BLOB_PREFIX/bookstack.sql" \
           --account-name '$(STORAGE_ACCOUNT_NAME)' \
-          --account-key '$(STORAGE_ACCOUNT_KEY)'
+          --auth-mode key --only-show-errors --no-progress
         az storage blob upload \
           --container-name '$(BLOB_CONTAINER_NAME)' \
           --file 'backup/uploads.tgz' \
           --name "$BLOB_PREFIX/uploads.tgz" \
           --account-name '$(STORAGE_ACCOUNT_NAME)' \
-          --account-key '$(STORAGE_ACCOUNT_KEY)'
+          --auth-mode key --only-show-errors --no-progress
         az storage blob upload \
           --container-name '$(BLOB_CONTAINER_NAME)' \
           --file 'backup/storage.tgz' \
           --name "$BLOB_PREFIX/storage.tgz" \
           --account-name '$(STORAGE_ACCOUNT_NAME)' \
-          --account-key '$(STORAGE_ACCOUNT_KEY)'
+          --auth-mode key --only-show-errors --no-progress
