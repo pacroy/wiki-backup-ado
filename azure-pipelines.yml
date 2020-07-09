@@ -42,7 +42,6 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       failOnStandardError: true
-      useGlobalConfig: true
       inlineScript: az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_CLUSTER_NAME)
   - task: Bash@3
     displayName: 'Execute Backup Script'
@@ -57,12 +56,14 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: ls -al backup/
-  - task: Bash@3
-    displayName: 'Upload Files to Blob'
+  - task: AzureCLI@2
+    displayName: 'Get AKS Credential'
     inputs:
-      failOnStderr: true
-      targetType: 'inline'
-      script: |
+      azureSubscription: 'par-shared-002(99813d40-928b-44b2-a969-2c7ea5bd8b96)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      failOnStandardError: true
+      inlineScript: |
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
           --container-name '$(BLOB_CONTAINER_NAME)' \
