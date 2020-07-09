@@ -11,15 +11,15 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        if [ -z "$AKS_RESOURCE_GROUP" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
-        if [ -z "$AKS_CLUSTER_NAME" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
-        if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
-        if [ -z "$WIKI_NAMSPACE" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
-        if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
-        if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
-        if [ -z "$BLOB_CONTAINER_NAME" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
-        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
-        if [ -z "$STORAGE_ACCOUNT_KEY" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_KEY" is not set'; fi
+        if [ -z "$(AKS_RESOURCE_GROUP)" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
+        if [ -z "$(AKS_CLUSTER_NAME)" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
+        if [ -z "$(KUBE_CONTEXT)" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
+        if [ -z "$(WIKI_NAMSPACE)" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
+        if [ -z "$(MYSQL_APP_LABEL)" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
+        if [ -z "$(BOOKSTACK_APP_LABEL)" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
+        if [ -z "$(BLOB_CONTAINER_NAME)" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
+        if [ -z "$(STORAGE_ACCOUNT_NAME)" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
+        if [ -z "$(STORAGE_ACCOUNT_KEY)" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_KEY" is not set'; fi
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
@@ -44,7 +44,7 @@ jobs:
       scriptLocation: 'inlineScript'
       failOnStandardError: true
       useGlobalConfig: true
-      inlineScript: az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME
+      inlineScript: az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_CLUSTER_NAME)
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
@@ -66,20 +66,20 @@ jobs:
       script: |
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
-          --container-name $BLOB_CONTAINER_NAME \
+          --container-name $(BLOB_CONTAINER_NAME) \
           --file 'backup/bookstack.sql' \
           --name "$BLOB_PREFIX/bookstack.sql" \
-          --account-name $STORAGE_ACCOUNT_NAME \
-          --account-key $STORAGE_ACCOUNT_KEY
+          --account-name $(STORAGE_ACCOUNT_NAME) \
+          --account-key $(STORAGE_ACCOUNT_KEY)
         az storage blob upload \
-          --container-name $BLOB_CONTAINER_NAME \
+          --container-name $(BLOB_CONTAINER_NAME) \
           --file 'backup/uploads.tgz' \
           --name "$BLOB_PREFIX/uploads.tgz" \
-          --account-name $STORAGE_ACCOUNT_NAME \
-          --account-key $STORAGE_ACCOUNT_KEY
+          --account-name $(STORAGE_ACCOUNT_NAME) \
+          --account-key $(STORAGE_ACCOUNT_KEY)
         az storage blob upload \
-          --container-name $BLOB_CONTAINER_NAME \
+          --container-name $(BLOB_CONTAINER_NAME) \
           --file 'backup/storage.tgz' \
           --name "$BLOB_PREFIX/storage.tgz" \
-          --account-name $STORAGE_ACCOUNT_NAME \
-          --account-key $STORAGE_ACCOUNT_KEY
+          --account-name $(STORAGE_ACCOUNT_NAME) \
+          --account-key $(STORAGE_ACCOUNT_KEY)
