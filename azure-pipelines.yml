@@ -37,3 +37,4 @@ jobs:
       failOnStderr: true
       targetType: 'filePath'
       filePath: backup.sh
+      arguments: '-y'
