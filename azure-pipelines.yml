@@ -17,6 +17,9 @@ jobs:
         if [ -z "$WIKI_NAMSPACE" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
         if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
         if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
+        if [ -z "$BLOB_CONTAINER_NAME" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
+        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
+        if [ -z "$STORAGE_ACCOUNT_KEY" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_KEY" is not set'; fi
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
@@ -56,16 +59,27 @@ jobs:
       targetType: 'inline'
       script: ls -al backup/
   - task: Bash@3
-    displayName: 'Get Current Date as Blob Prefix'
+    displayName: 'Upload Files to Blob'
     inputs:
       failOnStderr: true
       targetType: 'inline'
-      script: export BLOB_PREFIX=$(date +%Y%m%d)
-  - task: AzureFileCopy@4
-    inputs:
-      SourcePath: 'backup/*'
-      azureSubscription: 'par-shared-002(99813d40-928b-44b2-a969-2c7ea5bd8b96)'
-      Destination: 'AzureBlob'
-      storage: 'parwikibackupprod'
-      ContainerName: 'wikiprod'
-      BlobPrefix: $(BLOB_PREFIX)
+      script: |
+        BLOB_PREFIX=$(date +%Y%m%d)
+        az storage blob upload \
+          --container-name $BLOB_CONTAINER_NAME \
+          --file 'backup/bookstack.sql' \
+          --name "$BLOB_PREFIX/bookstack.sql" \
+          --account-name $STORAGE_ACCOUNT_NAME \
+          --account-key $STORAGE_ACCOUNT_KEY
+        az storage blob upload \
+          --container-name $BLOB_CONTAINER_NAME \
+          --file 'backup/uploads.tgz' \
+          --name "$BLOB_PREFIX/uploads.tgz" \
+          --account-name $STORAGE_ACCOUNT_NAME \
+          --account-key $STORAGE_ACCOUNT_KEY
+        az storage blob upload \
+          --container-name $BLOB_CONTAINER_NAME \
+          --file 'backup/storage.tgz' \
+          --name "$BLOB_PREFIX/storage.tgz" \
+          --account-name $STORAGE_ACCOUNT_NAME \
+          --account-key $STORAGE_ACCOUNT_KEY
