@@ -53,7 +53,7 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       failOnStandardError: true
-      inlineScript: az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_CLUSTER_NAME)
+      inlineScript: az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
@@ -77,20 +77,20 @@ jobs:
       inlineScript: |
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
-          --container-name '$(BLOB_CONTAINER_NAME)' \
+          --container-name "$BLOB_CONTAINER_NAME" \
           --file 'backup/bookstack.sql' \
           --name "$BLOB_PREFIX/bookstack.sql" \
-          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-name "$STORAGE_ACCOUNT_NAME" \
           --auth-mode key --only-show-errors --no-progress
         az storage blob upload \
-          --container-name '$(BLOB_CONTAINER_NAME)' \
+          --container-name "$BLOB_CONTAINER_NAME" \
           --file 'backup/uploads.tgz' \
           --name "$BLOB_PREFIX/uploads.tgz" \
-          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-name "$STORAGE_ACCOUNT_NAME" \
           --auth-mode key --only-show-errors --no-progress
         az storage blob upload \
-          --container-name '$(BLOB_CONTAINER_NAME)' \
+          --container-name "$BLOB_CONTAINER_NAME" \
           --file 'backup/storage.tgz' \
           --name "$BLOB_PREFIX/storage.tgz" \
-          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-name "$STORAGE_ACCOUNT_NAME" \
           --auth-mode key --only-show-errors --no-progress
