@@ -21,6 +21,7 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
+        if [ -z "$(AZURE_SERVICE_CONN)" ]; then >&2 echo 'Variable "AZURE_SERVICE_CONN" is not set'; fi
         if [ -z "$(AKS_RESOURCE_GROUP)" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
         if [ -z "$(AKS_CLUSTER_NAME)" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
         if [ -z "$(KUBE_CONTEXT)" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
@@ -48,7 +49,7 @@ jobs:
   - task: AzureCLI@2
     displayName: 'Get AKS Credential'
     inputs:
-      azureSubscription: 'par-shared-002(99813d40-928b-44b2-a969-2c7ea5bd8b96)'
+      azureSubscription: '$(AZURE_SERVICE_CONN)'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       failOnStandardError: true
@@ -69,7 +70,7 @@ jobs:
   - task: AzureCLI@2
     displayName: 'Upload Files to Blob'
     inputs:
-      azureSubscription: 'par-shared-002(99813d40-928b-44b2-a969-2c7ea5bd8b96)'
+      azureSubscription: '$(AZURE_SERVICE_CONN)'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       failOnStandardError: true
