@@ -21,6 +21,15 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
+        echo 'AZURE_SERVICE_CONN=$(AZURE_SERVICE_CONN)'
+        echo 'AKS_RESOURCE_GROUP=$(AKS_RESOURCE_GROUP)'
+        echo 'AKS_CLUSTER_NAME=$(AKS_CLUSTER_NAME)'
+        echo 'KUBE_CONTEXT=$(KUBE_CONTEXT)'
+        echo 'WIKI_NAMSPACE=$(WIKI_NAMSPACE)'
+        echo 'MYSQL_APP_LABEL=$(MYSQL_APP_LABEL)'
+        echo 'BOOKSTACK_APP_LABEL=$(BOOKSTACK_APP_LABEL)'
+        echo 'BLOB_CONTAINER_NAME=$(BLOB_CONTAINER_NAME)'
+        echo 'STORAGE_ACCOUNT_NAME=$(STORAGE_ACCOUNT_NAME)'
         if [ -z "$(AZURE_SERVICE_CONN)" ]; then >&2 echo 'Variable "AZURE_SERVICE_CONN" is not set'; fi
         if [ -z "$(AKS_RESOURCE_GROUP)" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
         if [ -z "$(AKS_CLUSTER_NAME)" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
