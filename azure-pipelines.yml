@@ -53,7 +53,7 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       failOnStandardError: true
-      inlineScript: az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME
+      inlineScript: az aks get-credentials --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME"
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
