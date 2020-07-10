@@ -1,8 +1,12 @@
+trigger: none
+pr: none
+  
+pool:
+  vmImage: 'ubuntu-18.04'
+
 jobs:
 - job: 'backup'
   displayName: 'Backup Wiki'
-  pool:
-    vmImage: 'ubuntu-18.04'
   steps:
   - checkout: none
   - task: Bash@3
