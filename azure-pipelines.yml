@@ -21,15 +21,15 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        if [ -z "$(AZURE_SERVICE_CONN)" ]; then >&2 echo 'Variable "AZURE_SERVICE_CONN" is not set'; fi
-        if [ -z "$(AKS_RESOURCE_GROUP)" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
-        if [ -z "$(AKS_CLUSTER_NAME)" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
-        if [ -z "$(KUBE_CONTEXT)" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
-        if [ -z "$(WIKI_NAMSPACE)" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
-        if [ -z "$(MYSQL_APP_LABEL)" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
-        if [ -z "$(BOOKSTACK_APP_LABEL)" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
-        if [ -z "$(BLOB_CONTAINER_NAME)" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
-        if [ -z "$(STORAGE_ACCOUNT_NAME)" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
+        if [ -z "$[AZURE_SERVICE_CONN]" ]; then >&2 echo 'Variable "AZURE_SERVICE_CONN" is not set'; fi
+        if [ -z "$[AKS_RESOURCE_GROUP]" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
+        if [ -z "$[AKS_CLUSTER_NAME]" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
+        if [ -z "$[KUBE_CONTEXT]" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
+        if [ -z "$[WIKI_NAMSPACE]" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
+        if [ -z "$[MYSQL_APP_LABEL]" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
+        if [ -z "$[BOOKSTACK_APP_LABEL]" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
+        if [ -z "$[BLOB_CONTAINER_NAME]" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
+        if [ -z "$[STORAGE_ACCOUNT_NAME]" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
@@ -49,11 +49,11 @@ jobs:
   - task: AzureCLI@2
     displayName: 'Get AKS Credential'
     inputs:
-      azureSubscription: '$(AZURE_SERVICE_CONN)'
+      azureSubscription: '$[AZURE_SERVICE_CONN]'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       failOnStandardError: true
-      inlineScript: az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_CLUSTER_NAME)
+      inlineScript: az aks get-credentials --resource-group $[AKS_RESOURCE_GROUP] --name $[AKS_CLUSTER_NAME]
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
@@ -70,27 +70,27 @@ jobs:
   - task: AzureCLI@2
     displayName: 'Upload Files to Blob'
     inputs:
-      azureSubscription: '$(AZURE_SERVICE_CONN)'
+      azureSubscription: '$[AZURE_SERVICE_CONN]'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       failOnStandardError: true
       inlineScript: |
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
-          --container-name '$(BLOB_CONTAINER_NAME)' \
+          --container-name '$[BLOB_CONTAINER_NAME]' \
           --file 'backup/bookstack.sql' \
           --name "$BLOB_PREFIX/bookstack.sql" \
-          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-name '$[STORAGE_ACCOUNT_NAME]' \
           --auth-mode key --only-show-errors --no-progress
         az storage blob upload \
-          --container-name '$(BLOB_CONTAINER_NAME)' \
+          --container-name '$[BLOB_CONTAINER_NAME]' \
           --file 'backup/uploads.tgz' \
           --name "$BLOB_PREFIX/uploads.tgz" \
-          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-name '$[STORAGE_ACCOUNT_NAME]' \
           --auth-mode key --only-show-errors --no-progress
         az storage blob upload \
-          --container-name '$(BLOB_CONTAINER_NAME)' \
+          --container-name '$[BLOB_CONTAINER_NAME]' \
           --file 'backup/storage.tgz' \
           --name "$BLOB_PREFIX/storage.tgz" \
-          --account-name '$(STORAGE_ACCOUNT_NAME)' \
+          --account-name '$[STORAGE_ACCOUNT_NAME]' \
           --auth-mode key --only-show-errors --no-progress
