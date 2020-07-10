@@ -1,5 +1,11 @@
 trigger: none
 pr: none
+schedules:
+- cron: "0 0 * * 0"
+  displayName: 'Weekly - Sunday Midnight'
+  branches:
+    include:
+    - master
   
 pool:
   vmImage: 'ubuntu-18.04'
