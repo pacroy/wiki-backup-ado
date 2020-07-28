@@ -15,4 +15,3 @@ Azure DevOps pipeline to backup Bookstack wiki deployed on AKS using [this Helm 
 | BOOKSTACK_APP_LABEL | Bookstack app label i.e. `<release_name>-bookstack` |
 | STORAGE_ACCOUNT_NAME | Azure Storage Account Name |
 | BLOB_CONTAINER_NAME | Azure Storage Blob Container Name |
-
