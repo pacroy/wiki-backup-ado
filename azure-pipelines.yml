@@ -39,12 +39,17 @@ jobs:
     env:
       SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
   - task: Bash@3
-    displayName: 'Install Tools'
+    displayName: 'Install kubelogin'
     inputs:
       failOnStderr: false
       targetType: 'inline'
       script: |
-        sudo az aks install-cli
+        kubelogin_latest_tag=$(curl -fsSL https://api.github.com/repos/Azure/kubelogin/releases/latest | jq -r '.tag_name')
+        kubelogin_download_url="https://github.com/Azure/kubelogin/releases/download/${kubelogin_latest_tag}/kubelogin-linux-amd64.zip"
+        curl -fsSLO "${kubelogin_download_url}"
+        unzip kubelogin-linux-amd64.zip
+        sudo mv ./bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
+        sudo chmod +x /usr/local/bin/kubelogin
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
