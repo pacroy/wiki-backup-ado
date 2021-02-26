@@ -77,6 +77,7 @@ jobs:
         az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "${SERVICE_PRINCIPAL_SECRET}"
         az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}"
         kubelogin convert-kubeconfig -l spn
+        kubectl version
     env:
       SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
   - task: Bash@3
