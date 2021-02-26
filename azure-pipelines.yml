@@ -27,7 +27,7 @@ jobs:
       script: |
         if [ -z "$TENANT_ID" ]; then >&2 echo 'Variable "TENANT_ID" is not set'; fi
         if [ -z "$SERVICE_PRINCIPAL_ID" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_ID" is not set'; fi
-        if [ -z "$SERVICE_PRINCIPAL_SECRET" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
+        if [ -z "$(SERVICE_PRINCIPAL_SECRET)" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
         if [ -z "$AKS_RESOURCE_GROUP" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
         if [ -z "$AKS_CLUSTER_NAME" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
         if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
@@ -36,8 +36,6 @@ jobs:
         if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
         if [ -z "$BLOB_CONTAINER_NAME" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
         if [ -z "$STORAGE_ACCOUNT_NAME" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
-    env:
-      SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
   - task: Bash@3
     displayName: 'Install kubelogin'
     inputs:
@@ -74,12 +72,12 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "${SERVICE_PRINCIPAL_SECRET}"
+        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
         az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}"
         kubelogin convert-kubeconfig -l spn
+        export AAD_SERVICE_PRINCIPAL_CLIENT_ID="$(SERVICE_PRINCIPAL_ID)"
+        export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET="$(SERVICE_PRINCIPAL_SECRET)"
         kubectl version
-    env:
-      SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
