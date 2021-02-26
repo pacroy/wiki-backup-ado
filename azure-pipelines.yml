@@ -25,7 +25,9 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        if [ -z "$AZURE_SERVICE_CONN" ]; then >&2 echo 'Variable "AZURE_SERVICE_CONN" is not set'; fi
+        if [ -z "$TENANT_ID" ]; then >&2 echo 'Variable "TENANT_ID" is not set'; fi
+        if [ -z "$SERVICE_PRINCIPAL_ID" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_ID" is not set'; fi
+        if [ -z "$SERVICE_PRINCIPAL_SECRET" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
         if [ -z "$AKS_RESOURCE_GROUP" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
         if [ -z "$AKS_CLUSTER_NAME" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
         if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
@@ -44,20 +46,25 @@ jobs:
         az version
         command -v kubectl
         kubectl version --client=true
+        command -v kubelogin
+        kubelogin --version
   - task: Bash@3
     displayName: 'Download Backup Script'
     inputs:
       failOnStderr: true
       targetType: 'inline'
       script: curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
-  - task: AzureCLI@2
-    displayName: 'Get AKS Credential'
+  - task: Bash@3
+    displayName: 'Login AKS'
     inputs:
-      azureSubscription: '$(AZURE_SERVICE_CONN)'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      failOnStandardError: true
-      inlineScript: az aks get-credentials --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME"
+      failOnStderr: true
+      targetType: 'inline'
+      script: |
+        az login --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "${SERVICE_PRINCIPAL_SECRET}"
+        az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}"
+        kubelogin convert-kubeconfig -l spn
+    env:
+      SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
@@ -65,20 +72,21 @@ jobs:
       targetType: 'filePath'
       filePath: backup.sh
       arguments: '-y'
+    env:
+      AAD_SERVICE_PRINCIPAL_CLIENT_ID: "$(SERVICE_PRINCIPAL_ID)"
+      AAD_SERVICE_PRINCIPAL_CLIENT_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
   - task: Bash@3
     displayName: 'List Backup Files'
     inputs:
       failOnStderr: true
       targetType: 'inline'
       script: ls -al backup/
-  - task: AzureCLI@2
-    displayName: 'Upload Files to Blob'
+  - task: Bash@3
+    displayName: 'List Backup Files'
     inputs:
-      azureSubscription: '$(AZURE_SERVICE_CONN)'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      failOnStandardError: true
-      inlineScript: |
+      failOnStderr: true
+      targetType: 'inline'
+      script: |
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
           --container-name "$BLOB_CONTAINER_NAME" \
