@@ -65,9 +65,11 @@ jobs:
     inputs:
       failOnStderr: true
       targetType: 'inline'
-      script: curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+      script: |
+        curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+        chmod +x backup.sh
   - task: Bash@3
-    displayName: 'Login AKS'
+    displayName: 'Login and Backup'
     inputs:
       failOnStderr: true
       targetType: 'inline'
@@ -78,16 +80,7 @@ jobs:
         export AAD_SERVICE_PRINCIPAL_CLIENT_ID="$(SERVICE_PRINCIPAL_ID)"
         export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET="$(SERVICE_PRINCIPAL_SECRET)"
         kubectl version
-  - task: Bash@3
-    displayName: 'Execute Backup Script'
-    inputs:
-      failOnStderr: true
-      targetType: 'filePath'
-      filePath: backup.sh
-      arguments: '-y'
-    env:
-      AAD_SERVICE_PRINCIPAL_CLIENT_ID: "$(SERVICE_PRINCIPAL_ID)"
-      AAD_SERVICE_PRINCIPAL_CLIENT_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
+        ./backup.sh -y
   - task: Bash@3
     displayName: 'List Backup Files'
     inputs:
