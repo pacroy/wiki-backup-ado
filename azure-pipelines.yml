@@ -36,6 +36,8 @@ jobs:
         if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
         if [ -z "$BLOB_CONTAINER_NAME" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
         if [ -z "$STORAGE_ACCOUNT_NAME" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
+    env:
+      SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
