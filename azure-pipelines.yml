@@ -62,7 +62,7 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        az login --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "${SERVICE_PRINCIPAL_SECRET}"
+        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "${SERVICE_PRINCIPAL_SECRET}"
         az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}"
         kubelogin convert-kubeconfig -l spn
     env:
