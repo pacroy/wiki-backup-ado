@@ -95,7 +95,7 @@ jobs:
       targetType: 'inline'
       script: ls -al backup/
   - task: Bash@3
-    displayName: 'List Backup Files'
+    displayName: 'Upload to Blob Storage'
     inputs:
       failOnStderr: true
       targetType: 'inline'
