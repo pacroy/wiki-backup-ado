@@ -121,3 +121,11 @@ jobs:
           --name "$BLOB_PREFIX/storage.tgz" \
           --account-name "$STORAGE_ACCOUNT_NAME" \
           --auth-mode key --only-show-errors --no-progress
+  - task: Bash@3
+    displayName: 'Clean up'
+    inputs:
+      failOnStderr: true
+      targetType: 'inline'
+      script: |
+        rm -rf ${HOME}/.kube
+        az account clear
