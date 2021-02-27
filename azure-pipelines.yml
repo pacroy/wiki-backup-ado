@@ -73,6 +73,7 @@ jobs:
       targetType: 'inline'
       script: |
         az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
+        if [ -n "${AKS_SUBSCRIPTION_ID}" ]; then az account set --subscription "${AKS_SUBSCRIPTION_ID}"; fi
         az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}"
         kubelogin convert-kubeconfig -l spn
         export AAD_SERVICE_PRINCIPAL_CLIENT_ID="$(SERVICE_PRINCIPAL_ID)"
@@ -100,6 +101,7 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
+        if [ -n "${STORAGE_SUBSCRIPTION_ID}" ]; then az account set --subscription "${STORAGE_SUBSCRIPTION_ID}"; fi
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
           --container-name "$BLOB_CONTAINER_NAME" \

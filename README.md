@@ -57,11 +57,13 @@ kubectl apply -f clusterrolebinding.yml
 | TENANT_ID | Azure Tenant ID of service principal |
 | SERVICE_PRINCIPAL_ID | Service principal client ID that having permission to access AKS and storage account |
 | SERVICE_PRINCIPAL_SECRET | Service principal client secret |
+| AKS_SUBSCRIPTION_ID | _[Optional]_ Subscription ID of the AKS cluster |
 | AKS_RESOURCE_GROUP | Resource Group Name of AKS |
 | AKS_CLUSTER_NAME | AKS Cluster Name |
 | KUBE_CONTEXT | Kubectl Context Name |
 | WIKI_NAMSPACE | Kubectl Namespace |
 | MYSQL_APP_LABEL | MySQL app label i.e. `<release_name>-mysql` |
 | BOOKSTACK_APP_LABEL | Bookstack app label i.e. `<release_name>-bookstack` |
+| STORAGE_SUBSCRIPTION_ID | _[Optional]_ Subscription ID of the storage account |
 | STORAGE_ACCOUNT_NAME | Azure Storage Account Name |
 | BLOB_CONTAINER_NAME | Azure Storage Blob Container Name |
