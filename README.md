@@ -1,6 +1,54 @@
 # Bookstack Backup using ADO
 
-Azure DevOps pipeline to backup Bookstack wiki deployed on AKS using [this Helm chart](https://github.com/pacroy/bookstack).
+Azure DevOps pipelines to make a backup of Bookstack application deployed on AKS using [this Helm chart](https://github.com/pacroy/bookstack) and upload backup archives to Azure storage account.
+
+## Service Principal
+
+This pipelines needs a service principal to access AKS cluster and Azure storage account.
+
+### Create Service Principal
+
+```sh
+az ad sp create-for-rbac --skip-assignment --name "http://your-sp-name"
+```
+
+### Grant Permission to Storage Account
+
+Contributor permission is required over a storage account to upload backup archives.
+
+```sh
+az role assignment create --assignee "{service-principal-id}" --role "Contributor" --scope "/subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.Storage/storageAccounts/{storage-account}"
+```
+
+### Grant Permission to AKS cluster
+
+`Azure Kubernetes Service Cluster User Role` permission is required to get the cluster credential (kubeconfig)
+
+```sh
+az role assignment create --assignee "{service-principal-id}" --role "Azure Kubernetes Service Cluster User Role" --scope "/subscriptions/{subscription-id}/resourcegroups/{resource-group}/providers/Microsoft.ContainerService/managedClusters/{aks-cluster}"
+```
+
+List Permissions to verify
+
+```sh
+az role assignment list --all --assignee "{service-principal-id}" --subscription "{subscription-id}" --output table
+```
+
+### Grant Permission to Namespace
+
+To access Bookstack in a namespace, you also need to create ClusterRoleBinding with permission `edit`.
+
+Get service principal object id.
+
+```sh
+az ad sp show --id "4035193b-58dd-4d1e-ba10-52adc18690a4" --query "objectId" --output tsv
+```
+
+Set service principal object id in [`clusterrolebinding.yml`](clusterrolebinding.yml) and apply it.
+
+```sh
+kubectl apply -f clusterrolebinding.yml
+```
 
 ## Variables
 
