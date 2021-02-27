@@ -41,7 +41,7 @@ To access Bookstack in a namespace, you also need to create ClusterRoleBinding w
 Get service principal object id.
 
 ```sh
-az ad sp show --id "4035193b-58dd-4d1e-ba10-52adc18690a4" --query "objectId" --output tsv
+az ad sp show --id "{service-principal-id}" --query "objectId" --output tsv
 ```
 
 Set service principal object id in [`clusterrolebinding.yml`](clusterrolebinding.yml) and apply it.
