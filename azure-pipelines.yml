@@ -86,6 +86,11 @@ jobs:
       targetType: 'inline'
       script: |
         echo "${KUBE_CA_BASE64}" | base64 -d > cert.pem
+
+        echo "##[group]Beginning of a group"
+        cat cert.pem
+        echo "##[endgroup]"
+        
         kubectl config set-cluster "${KUBE_CLUSTER_NAME}" --server "${KUBE_API_SERVER}" --embed-certs --certificate-authority=cert.pem
         kubectl config set-credentials "clusterUser_${KUBE_CLUSTER_NAME}" --auth-provider=azure \
           --auth-provider-arg="apiserver-id=${KUBE_SERVER_ID}" \
