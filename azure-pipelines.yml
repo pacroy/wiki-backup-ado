@@ -34,8 +34,13 @@ jobs:
         if [ -z "$TENANT_ID" ]; then >&2 echo 'Variable "TENANT_ID" is not set'; fi
         if [ -z "$SERVICE_PRINCIPAL_ID" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_ID" is not set'; fi
         if [ -z "$(SERVICE_PRINCIPAL_SECRET)" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
-        if [ -z "$AKS_RESOURCE_GROUP" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
-        if [ -z "$AKS_CLUSTER_NAME" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
+
+        if [ -z "$(KUBE_CA_BASE64)" ]; then >&2 echo 'Variable "KUBE_CA_BASE64" is not set'; fi
+        if [ -z "$(KUBE_CLUSTER_NAME)" ]; then >&2 echo 'Variable "KUBE_CLUSTER_NAME" is not set'; fi
+        if [ -z "$(KUBE_API_SERVER)" ]; then >&2 echo 'Variable "KUBE_API_SERVER" is not set'; fi
+        if [ -z "$(KUBE_SERVER_ID)" ]; then >&2 echo 'Variable "KUBE_SERVER_ID" is not set'; fi
+        if [ -z "$(KUBE_CLIENT_ID)" ]; then >&2 echo 'Variable "KUBE_CLIENT_ID" is not set'; fi
+
         if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
         if [ -z "$WIKI_NAMSPACE" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
         if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
@@ -72,17 +77,28 @@ jobs:
       targetType: 'inline'
       script: curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
   - task: Bash@3
-    displayName: 'Login AKS'
+    displayName: 'Login Kubernetes'
     inputs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
-        if [ -n "${AKS_SUBSCRIPTION_ID}" ]; then az account set --subscription "${AKS_SUBSCRIPTION_ID}"; fi
-        az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}"
-        kubelogin convert-kubeconfig -l spn
-        export AAD_SERVICE_PRINCIPAL_CLIENT_ID="$(SERVICE_PRINCIPAL_ID)"
-        export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET="$(SERVICE_PRINCIPAL_SECRET)"
+        echo "${KUBE_CA_BASE64}" | base64 -d > cert.pem
+        kubectl config set-cluster "${KUBE_CLUSTER_NAME}" --server "${KUBE_API_SERVER}" --embed-certs --certificate-authority=cert.pem
+        kubectl config set-credentials "clusterUser_${KUBE_CLUSTER_NAME}" --auth-provider=azure \
+          --auth-provider-arg="apiserver-id=${KUBE_SERVER_ID}" \
+          --auth-provider-arg="client-id=${KUBE_CLIENT_ID}" \
+          --auth-provider-arg=config-mode='1' \
+          --auth-provider-arg=environment=AzurePublicCloud \
+          --auth-provider-arg="tenant-id=${TENANT_ID}"
+        kubectl config set-context "${KUBE_CLUSTER_NAME}" --user=cluster-admin --cluster="${KUBE_CLUSTER_NAME}" --user="clusterUser_${KUBE_CLUSTER_NAME}"
+        kubectl config use-context "${KUBE_CLUSTER_NAME}"
+
+        if [ -n "${SERVICE_PRINCIPAL_ID}" ]; then
+          kubelogin convert-kubeconfig -l spn
+          export AAD_SERVICE_PRINCIPAL_CLIENT_ID="$(SERVICE_PRINCIPAL_ID)"
+          export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET="$(SERVICE_PRINCIPAL_SECRET)"
+        fi
+
         kubectl version
   - task: Bash@3
     displayName: 'Execute Backup Script'
@@ -133,5 +149,7 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        rm -rf ${HOME}/.kube
-        az account clear
+        kubectl config delete-context "${KUBE_CLUSTER_NAME}"
+        kubectl config delete-user "clusterUser_${KUBE_CLUSTER_NAME}"
+        kubectl config delete-cluster "${KUBE_CLUSTER_NAME}"
+        rm -f cert.pem
