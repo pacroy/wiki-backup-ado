@@ -29,7 +29,7 @@ jobs:
     displayName: 'Check Pipeline Variables'
     env:
       SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
-      KUBE_CA_BASE64: "$(KUBE_CA_BASE64"
+      KUBE_CA_BASE64: "$(KUBE_CA_BASE64)"
     inputs:
       failOnStderr: true
       targetType: 'inline'
