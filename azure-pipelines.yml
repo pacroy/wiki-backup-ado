@@ -126,6 +126,7 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
+        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
         if [ -n "${STORAGE_SUBSCRIPTION_ID}" ]; then az account set --subscription "${STORAGE_SUBSCRIPTION_ID}"; fi
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
