@@ -102,7 +102,7 @@ jobs:
       script: ls -al backup/
   - task: Bash@3
     displayName: 'Upload to Blob Storage'
-    condition: eq(parameters.isDryRun, false)
+    condition: eq('${{ parameters.isDryRun }}', false)
     inputs:
       failOnStderr: true
       targetType: 'inline'
