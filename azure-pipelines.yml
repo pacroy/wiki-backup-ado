@@ -27,13 +27,16 @@ jobs:
   - checkout: none
   - task: Bash@3
     displayName: 'Check Pipeline Variables'
+    env:
+      SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
+      KUBE_CA_BASE64: "$(KUBE_CA_BASE64"
     inputs:
       failOnStderr: true
       targetType: 'inline'
       script: |
         if [ -z "$TENANT_ID" ]; then echo '##vso[task.logissue type=warning]Variable "TENANT_ID" is not set'; fi
         if [ -z "$SERVICE_PRINCIPAL_ID" ]; then echo '##vso[task.logissue type=warning]Variable "SERVICE_PRINCIPAL_ID" is not set'; fi
-        if [ -z "$(SERVICE_PRINCIPAL_SECRET)" ]; then echo '##vso[task.logissue type=warning]Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
+        if [ -z "$SERVICE_PRINCIPAL_SECRET" ]; then echo '##vso[task.logissue type=warning]Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
 
         if [ -z "$KUBE_CA_BASE64" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
         if [ -z "$KUBE_CLUSTER_NAME" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLUSTER_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
