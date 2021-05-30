@@ -64,7 +64,7 @@ jobs:
     inputs:
       failOnStderr: true
       targetType: 'inline'
-      script: curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+      script: curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
   - task: Bash@3
     displayName: 'Login AKS'
     inputs:
