@@ -149,7 +149,7 @@ jobs:
   - task: Bash@3
     displayName: 'Clean up'
     inputs:
-      failOnStderr: true
+      failOnStderr: false
       targetType: 'inline'
       script: |
         kubectl config delete-context "${KUBE_CLUSTER_NAME}"
