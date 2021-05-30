@@ -31,22 +31,22 @@ jobs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        if [ -z "$TENANT_ID" ]; then >&2 echo 'Variable "TENANT_ID" is not set'; fi
-        if [ -z "$SERVICE_PRINCIPAL_ID" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_ID" is not set'; fi
-        if [ -z "$(SERVICE_PRINCIPAL_SECRET)" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
+        if [ -z "$TENANT_ID" ]; then echo '##vso[task.logissue type=warning]Variable "TENANT_ID" is not set'; fi
+        if [ -z "$SERVICE_PRINCIPAL_ID" ]; then echo '##vso[task.logissue type=warning]Variable "SERVICE_PRINCIPAL_ID" is not set'; fi
+        if [ -z "$(SERVICE_PRINCIPAL_SECRET)" ]; then echo '##vso[task.logissue type=warning]Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
 
-        if [ -z "$(KUBE_CA_BASE64)" ]; then >&2 echo 'Variable "KUBE_CA_BASE64" is not set'; fi
-        if [ -z "$(KUBE_CLUSTER_NAME)" ]; then >&2 echo 'Variable "KUBE_CLUSTER_NAME" is not set'; fi
-        if [ -z "$(KUBE_API_SERVER)" ]; then >&2 echo 'Variable "KUBE_API_SERVER" is not set'; fi
-        if [ -z "$(KUBE_SERVER_ID)" ]; then >&2 echo 'Variable "KUBE_SERVER_ID" is not set'; fi
-        if [ -z "$(KUBE_CLIENT_ID)" ]; then >&2 echo 'Variable "KUBE_CLIENT_ID" is not set'; fi
+        if [ -z "$(KUBE_CA_BASE64)" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$(KUBE_CLUSTER_NAME)" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLUSTER_NAME" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$(KUBE_API_SERVER)" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_API_SERVER" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$(KUBE_SERVER_ID)" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_SERVER_ID" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$(KUBE_CLIENT_ID)" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
 
-        if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
-        if [ -z "$WIKI_NAMSPACE" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
-        if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
-        if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
-        if [ -z "$BLOB_CONTAINER_NAME" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
-        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
+        if [ -z "$KUBE_CONTEXT" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CONTEXT" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$WIKI_NAMSPACE" ]; then echo '##vso[task.logissue type=error]Variable "WIKI_NAMSPACE" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$MYSQL_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "MYSQL_APP_LABEL" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$BOOKSTACK_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "BOOKSTACK_APP_LABEL" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$BLOB_CONTAINER_NAME" ]; then echo '##vso[task.logissue type=error]Variable "BLOB_CONTAINER_NAME" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then echo '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set'; && echo '##vso[task.complete result=Failed;]DONE'; fi
   - task: Bash@3
     displayName: 'Install kubelogin'
     inputs:
