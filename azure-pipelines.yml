@@ -30,6 +30,7 @@ jobs:
     env:
       SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
       KUBE_CA_BASE64: "$(KUBE_CA_BASE64)"
+      KUBE_USER_TOKEN: "$(KUBE_USER_TOKEN)"
     inputs:
       failOnStderr: true
       targetType: 'inline'
@@ -41,8 +42,12 @@ jobs:
         if [ -z "$KUBE_CA_BASE64" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
         if [ -z "$KUBE_CLUSTER_NAME" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLUSTER_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
         if [ -z "$KUBE_API_SERVER" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_API_SERVER" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$KUBE_SERVER_ID" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_SERVER_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$KUBE_CLIENT_ID" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+
+        if [ -n "$KUBE_SERVER_ID" ]; then
+          if [ -z "$KUBE_CLIENT_ID" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        else
+          if [ -z "$KUBE_USER_TOKEN" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_USER_TOKEN" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        fi
 
         if [ -z "$KUBE_CONTEXT" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CONTEXT" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
         if [ -z "$WIKI_NAMSPACE" ]; then echo '##vso[task.logissue type=error]Variable "WIKI_NAMSPACE" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
@@ -87,12 +92,18 @@ jobs:
       script: |
         echo "$(KUBE_CA_BASE64)" | base64 -d > cert.pem
         kubectl config set-cluster "${KUBE_CLUSTER_NAME}" --server "${KUBE_API_SERVER}" --embed-certs --certificate-authority=cert.pem
-        kubectl config set-credentials "clusterUser_${KUBE_CLUSTER_NAME}" --auth-provider=azure \
-          --auth-provider-arg="apiserver-id=${KUBE_SERVER_ID}" \
-          --auth-provider-arg="client-id=${KUBE_CLIENT_ID}" \
-          --auth-provider-arg=config-mode='1' \
-          --auth-provider-arg=environment=AzurePublicCloud \
-          --auth-provider-arg="tenant-id=${TENANT_ID}"
+
+        if [ -n "${KUBE_SERVER_ID}" ]; then
+          kubectl config set-credentials "clusterUser_${KUBE_CLUSTER_NAME}" --auth-provider=azure \
+            --auth-provider-arg="apiserver-id=${KUBE_SERVER_ID}" \
+            --auth-provider-arg="client-id=${KUBE_CLIENT_ID}" \
+            --auth-provider-arg=config-mode='1' \
+            --auth-provider-arg=environment=AzurePublicCloud \
+            --auth-provider-arg="tenant-id=${TENANT_ID}"
+        else
+          kubectl config set-credentials "clusterUser_${KUBE_CLUSTER_NAME}" --token="$(KUBE_USER_TOKEN)"
+        fi
+
         kubectl config set-context "${KUBE_CLUSTER_NAME}" --user=cluster-admin --cluster="${KUBE_CLUSTER_NAME}" --user="clusterUser_${KUBE_CLUSTER_NAME}"
         kubectl config use-context "${KUBE_CLUSTER_NAME}"
 
