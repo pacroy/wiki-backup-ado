@@ -168,3 +168,5 @@ jobs:
         kubectl config delete-user "clusterUser_${KUBE_CLUSTER_NAME}"
         kubectl config delete-cluster "${KUBE_CLUSTER_NAME}"
         rm -f cert.pem
+        az logout
+        az account clear 
