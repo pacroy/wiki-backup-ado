@@ -8,11 +8,17 @@ schedules:
   displayName: 'Weekly - Sunday Midnight'
   branches:
     include:
-    - master
+    - main
   always: true
   
 pool:
-  vmImage: 'ubuntu-18.04'
+  vmImage: 'ubuntu-20.04'
+
+parameters:
+- name: 'isDryRun'
+  displayName: 'Dry-run'
+  type: boolean
+  default: false
 
 jobs:
 - job: 'backup'
@@ -21,21 +27,33 @@ jobs:
   - checkout: none
   - task: Bash@3
     displayName: 'Check Pipeline Variables'
+    env:
+      SERVICE_PRINCIPAL_SECRET: "$(SERVICE_PRINCIPAL_SECRET)"
+      KUBE_CA_BASE64: "$(KUBE_CA_BASE64)"
+      KUBE_USER_TOKEN: "$(KUBE_USER_TOKEN)"
     inputs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        if [ -z "$TENANT_ID" ]; then >&2 echo 'Variable "TENANT_ID" is not set'; fi
-        if [ -z "$SERVICE_PRINCIPAL_ID" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_ID" is not set'; fi
-        if [ -z "$(SERVICE_PRINCIPAL_SECRET)" ]; then >&2 echo 'Variable "SERVICE_PRINCIPAL_SECRET" is not set'; fi
-        if [ -z "$AKS_RESOURCE_GROUP" ]; then >&2 echo 'Variable "AKS_RESOURCE_GROUP" is not set'; fi
-        if [ -z "$AKS_CLUSTER_NAME" ]; then >&2 echo 'Variable "AKS_CLUSTER_NAME" is not set'; fi
-        if [ -z "$KUBE_CONTEXT" ]; then >&2 echo 'Variable "KUBE_CONTEXT" is not set'; fi
-        if [ -z "$WIKI_NAMSPACE" ]; then >&2 echo 'Variable "WIKI_NAMSPACE" is not set'; fi
-        if [ -z "$MYSQL_APP_LABEL" ]; then >&2 echo 'Variable "MYSQL_APP_LABEL" is not set'; fi
-        if [ -z "$BOOKSTACK_APP_LABEL" ]; then >&2 echo 'Variable "BOOKSTACK_APP_LABEL" is not set'; fi
-        if [ -z "$BLOB_CONTAINER_NAME" ]; then >&2 echo 'Variable "BLOB_CONTAINER_NAME" is not set'; fi
-        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then >&2 echo 'Variable "STORAGE_ACCOUNT_NAME" is not set'; fi
+        if [ -z "$TENANT_ID" ]; then echo '##vso[task.logissue type=error]Variable "TENANT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$SERVICE_PRINCIPAL_ID" ]; then echo '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$SERVICE_PRINCIPAL_SECRET" ]; then echo '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_SECRET" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+
+        if [ -z "$KUBE_CA_BASE64" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$KUBE_API_SERVER" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_API_SERVER" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+
+        if [ -n "$KUBE_SERVER_ID" ]; then
+          if [ -z "$KUBE_CLIENT_ID" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        else
+          if [ -z "$KUBE_USER_TOKEN" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_USER_TOKEN" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        fi
+
+        if [ -z "$KUBE_CONTEXT" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CONTEXT" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$WIKI_NAMSPACE" ]; then echo '##vso[task.logissue type=error]Variable "WIKI_NAMSPACE" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$MYSQL_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "MYSQL_APP_LABEL" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$BOOKSTACK_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "BOOKSTACK_APP_LABEL" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$BLOB_CONTAINER_NAME" ]; then echo '##vso[task.logissue type=error]Variable "BLOB_CONTAINER_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then echo '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
   - task: Bash@3
     displayName: 'Install kubelogin'
     inputs:
@@ -46,8 +64,7 @@ jobs:
         kubelogin_download_url="https://github.com/Azure/kubelogin/releases/download/${kubelogin_latest_tag}/kubelogin-linux-amd64.zip"
         curl -fsSLO "${kubelogin_download_url}"
         unzip kubelogin-linux-amd64.zip
-        sudo mv ./bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
-        sudo chmod +x /usr/local/bin/kubelogin
+        sudo install -o root -g root -m 0755 ./bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
@@ -65,19 +82,36 @@ jobs:
     inputs:
       failOnStderr: true
       targetType: 'inline'
-      script: curl -s https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+      script: curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
   - task: Bash@3
-    displayName: 'Login AKS'
+    displayName: 'Login Kubernetes'
     inputs:
       failOnStderr: true
       targetType: 'inline'
       script: |
-        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
-        if [ -n "${AKS_SUBSCRIPTION_ID}" ]; then az account set --subscription "${AKS_SUBSCRIPTION_ID}"; fi
-        az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}"
-        kubelogin convert-kubeconfig -l spn
-        export AAD_SERVICE_PRINCIPAL_CLIENT_ID="$(SERVICE_PRINCIPAL_ID)"
-        export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET="$(SERVICE_PRINCIPAL_SECRET)"
+        echo "$(KUBE_CA_BASE64)" | base64 -d > cert.pem
+        kubectl config set-cluster "${KUBE_CONTEXT}" --server "${KUBE_API_SERVER}" --embed-certs --certificate-authority=cert.pem
+
+        if [ -n "${KUBE_SERVER_ID}" ]; then
+          kubectl config set-credentials "clusterUser_${KUBE_CONTEXT}" --auth-provider=azure \
+            --auth-provider-arg="apiserver-id=${KUBE_SERVER_ID}" \
+            --auth-provider-arg="client-id=${KUBE_CLIENT_ID}" \
+            --auth-provider-arg=config-mode='1' \
+            --auth-provider-arg=environment=AzurePublicCloud \
+            --auth-provider-arg="tenant-id=${TENANT_ID}"
+        else
+          kubectl config set-credentials "clusterUser_${KUBE_CONTEXT}" --token="$(KUBE_USER_TOKEN)"
+        fi
+
+        kubectl config set-context "${KUBE_CONTEXT}" --user=cluster-admin --cluster="${KUBE_CONTEXT}" --user="clusterUser_${KUBE_CONTEXT}"
+        kubectl config use-context "${KUBE_CONTEXT}"
+
+        if [ -n "${SERVICE_PRINCIPAL_ID}" ]; then
+          kubelogin convert-kubeconfig -l spn
+          export AAD_SERVICE_PRINCIPAL_CLIENT_ID="$(SERVICE_PRINCIPAL_ID)"
+          export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET="$(SERVICE_PRINCIPAL_SECRET)"
+        fi
+
         kubectl version
   - task: Bash@3
     displayName: 'Execute Backup Script'
@@ -94,13 +128,15 @@ jobs:
     inputs:
       failOnStderr: true
       targetType: 'inline'
-      script: ls -al backup/
+      script: ls -Al backup/
   - task: Bash@3
     displayName: 'Upload to Blob Storage'
+    condition: eq('${{ parameters.isDryRun }}', false)
     inputs:
       failOnStderr: true
       targetType: 'inline'
       script: |
+        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
         if [ -n "${STORAGE_SUBSCRIPTION_ID}" ]; then az account set --subscription "${STORAGE_SUBSCRIPTION_ID}"; fi
         BLOB_PREFIX=$(date +%Y%m%d)
         az storage blob upload \
@@ -124,8 +160,13 @@ jobs:
   - task: Bash@3
     displayName: 'Clean up'
     inputs:
-      failOnStderr: true
+      failOnStderr: false
       targetType: 'inline'
       script: |
-        rm -rf ${HOME}/.kube
-        az account clear
+        kubectl config delete-context "${KUBE_CONTEXT}"
+        kubectl config delete-user "clusterUser_${KUBE_CONTEXT}"
+        kubectl config delete-cluster "${KUBE_CONTEXT}"
+        rm -f cert.pem
+        rm -rf backup
+        az logout
+        az account clear 
