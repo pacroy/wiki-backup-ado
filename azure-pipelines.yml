@@ -128,7 +128,7 @@ jobs:
     inputs:
       failOnStderr: true
       targetType: 'inline'
-      script: ls -al backup/
+      script: ls -Al backup/
   - task: Bash@3
     displayName: 'Upload to Blob Storage'
     condition: eq('${{ parameters.isDryRun }}', false)
