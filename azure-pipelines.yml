@@ -167,5 +167,6 @@ jobs:
         kubectl config delete-user "clusterUser_${KUBE_CONTEXT}"
         kubectl config delete-cluster "${KUBE_CONTEXT}"
         rm -f cert.pem
+        rm -rf backup
         az logout
         az account clear 
