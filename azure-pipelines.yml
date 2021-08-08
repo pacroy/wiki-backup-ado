@@ -32,7 +32,6 @@ jobs:
       KUBE_CA_BASE64: "$(KUBE_CA_BASE64)"
       KUBE_USER_TOKEN: "$(KUBE_USER_TOKEN)"
     inputs:
-      failOnStderr: true
       targetType: 'inline'
       script: |
         if [ -z "$TENANT_ID" ]; then echo '##vso[task.logissue type=error]Variable "TENANT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
@@ -68,7 +67,6 @@ jobs:
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
-      failOnStderr: false
       targetType: 'inline'
       script: |
         command -v az
@@ -86,7 +84,6 @@ jobs:
   - task: Bash@3
     displayName: 'Login Kubernetes'
     inputs:
-      failOnStderr: true
       targetType: 'inline'
       script: |
         echo "$(KUBE_CA_BASE64)" | base64 -d > cert.pem
@@ -160,7 +157,6 @@ jobs:
   - task: Bash@3
     displayName: 'Clean up'
     inputs:
-      failOnStderr: false
       targetType: 'inline'
       script: |
         kubectl config delete-context "${KUBE_CONTEXT}"
