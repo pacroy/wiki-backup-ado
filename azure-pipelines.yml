@@ -56,7 +56,6 @@ jobs:
   - task: Bash@3
     displayName: 'Install kubelogin'
     inputs:
-      failOnStderr: false
       targetType: 'inline'
       script: |
         kubelogin_latest_tag=$(curl -fsSL https://api.github.com/repos/Azure/kubelogin/releases/latest | jq -r '.tag_name')
@@ -78,7 +77,6 @@ jobs:
   - task: Bash@3
     displayName: 'Download Backup Script'
     inputs:
-      failOnStderr: true
       targetType: 'inline'
       script: curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
   - task: Bash@3
@@ -113,7 +111,6 @@ jobs:
   - task: Bash@3
     displayName: 'Execute Backup Script'
     inputs:
-      failOnStderr: true
       targetType: 'filePath'
       filePath: backup.sh
       arguments: '-y'
@@ -123,14 +120,12 @@ jobs:
   - task: Bash@3
     displayName: 'List Backup Files'
     inputs:
-      failOnStderr: true
       targetType: 'inline'
       script: ls -Al backup/
   - task: Bash@3
     displayName: 'Upload to Blob Storage'
     condition: eq('${{ parameters.isDryRun }}', false)
     inputs:
-      failOnStderr: true
       targetType: 'inline'
       script: |
         az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
