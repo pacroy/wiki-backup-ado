@@ -124,7 +124,7 @@ jobs:
       script: ls -Al backup/
   - task: Bash@3
     displayName: 'Upload to Blob Storage'
-    condition: eq('${{ parameters.isDryRun }}', false)
+    condition: and(succeeded(), eq('${{ parameters.isDryRun }}', false))
     inputs:
       targetType: 'inline'
       script: |
