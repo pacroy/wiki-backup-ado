@@ -75,10 +75,12 @@ jobs:
         command -v kubelogin
         kubelogin --version
   - task: Bash@3
-    displayName: 'Download Backup Script'
+    displayName: 'Preparation'
     inputs:
       targetType: 'inline'
-      script: curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+      script: |
+        curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+        mkdir -p backup
   - task: Bash@3
     displayName: 'Login Kubernetes'
     inputs:
