@@ -34,25 +34,32 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        if [ -z "$TENANT_ID" ]; then echo '##vso[task.logissue type=error]Variable "TENANT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$SERVICE_PRINCIPAL_ID" ]; then echo '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$SERVICE_PRINCIPAL_SECRET" ]; then echo '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_SECRET" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        set -o errexit
+        set -o pipefail
 
-        if [ -z "$KUBE_CA_BASE64" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$KUBE_API_SERVER" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_API_SERVER" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        validate() {
+          if [ -z "$1" ]; then echo "$2" && echo '##vso[task.complete result=Failed;]DONE'; fi
+        }
+
+        validate "$TENANT_ID" '##vso[task.logissue type=error]Variable "TENANT_ID" is not set'
+        validate "$SERVICE_PRINCIPAL_ID" '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_ID" is not set'
+        validate "$SERVICE_PRINCIPAL_SECRET" '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_SECRET" is not set'
+
+        validate "$KUBE_CA_BASE64" '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set'
+        validate "$KUBE_API_SERVER" '##vso[task.logissue type=error]Variable "KUBE_API_SERVER" is not set'
 
         if [ -n "$KUBE_SERVER_ID" ]; then
-          if [ -z "$KUBE_CLIENT_ID" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+          validate "$KUBE_CLIENT_ID" '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set'
         else
-          if [ -z "$KUBE_USER_TOKEN" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_USER_TOKEN" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+          validate "$KUBE_USER_TOKEN" '##vso[task.logissue type=error]Variable "KUBE_USER_TOKEN" is not set'
         fi
 
-        if [ -z "$KUBE_CONTEXT" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CONTEXT" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$WIKI_NAMSPACE" ]; then echo '##vso[task.logissue type=error]Variable "WIKI_NAMSPACE" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$MYSQL_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "MYSQL_APP_LABEL" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$BOOKSTACK_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "BOOKSTACK_APP_LABEL" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$BLOB_CONTAINER_NAME" ]; then echo '##vso[task.logissue type=error]Variable "BLOB_CONTAINER_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then echo '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        validate "$KUBE_CONTEXT" '##vso[task.logissue type=error]Variable "KUBE_CONTEXT" is not set'
+        validate "$WIKI_NAMSPACE" '##vso[task.logissue type=error]Variable "WIKI_NAMSPACE" is not set'
+        validate "$MYSQL_APP_LABEL" '##vso[task.logissue type=error]Variable "MYSQL_APP_LABEL" is not set'
+        validate "$BOOKSTACK_APP_LABEL" '##vso[task.logissue type=error]Variable "BOOKSTACK_APP_LABEL" is not set'
+        validate "$BLOB_CONTAINER_NAME" '##vso[task.logissue type=error]Variable "BLOB_CONTAINER_NAME" is not set'
+        validate "$STORAGE_ACCOUNT_NAME '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set'
   - task: Bash@3
     displayName: 'Install kubelogin'
     inputs:
