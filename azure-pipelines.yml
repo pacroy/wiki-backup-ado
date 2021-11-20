@@ -16,7 +16,7 @@ pool:
 
 parameters:
 - name: 'isDryRun'
-  displayName: 'Dry-run'
+  displayName: 'Dry-run: skip uploading backup files to blob storage'
   type: boolean
   default: false
 
