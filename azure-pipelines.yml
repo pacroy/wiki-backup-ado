@@ -83,7 +83,8 @@ jobs:
         unzip kubelogin-linux-amd64.zip > /dev/null
         sudo install -o root -g root -m 0755 ./bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
 
-        echo "kubelogin instslled at $(command -v kubelogin)"
+        echo "kubelogin installed at $(command -v kubelogin)"
+        echo
         kubelogin --version
   - task: Bash@3
     displayName: 'Print Tool Version'
@@ -172,9 +173,9 @@ jobs:
         set -o pipefail
 
         echo "Logging in Azure ..."
-        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)" --output table
+        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
         if [ -n "${STORAGE_SUBSCRIPTION_ID}" ]; then az account set --subscription "${STORAGE_SUBSCRIPTION_ID}"; fi
-
+        echo
         BLOB_PREFIX=$(date +%Y%m%d)
         echo "Uploading Bookstack database backup file ..."
         az storage blob upload \
