@@ -74,9 +74,14 @@ jobs:
       script: |
         kubelogin_latest_tag=$(curl -fsSL https://api.github.com/repos/Azure/kubelogin/releases/latest | jq -r '.tag_name')
         kubelogin_download_url="https://github.com/Azure/kubelogin/releases/download/${kubelogin_latest_tag}/kubelogin-linux-amd64.zip"
+
+        echo "Downloading kubelogin from $kubelogin_download_url ..."
         curl -fsSLO "${kubelogin_download_url}"
-        unzip kubelogin-linux-amd64.zip
+        unzip kubelogin-linux-amd64.zip > /dev/null
         sudo install -o root -g root -m 0755 ./bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
+        
+        echo "kubelogin instslled at $(command -v kubelogin)"
+        kubelogin --version
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
