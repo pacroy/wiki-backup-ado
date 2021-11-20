@@ -59,7 +59,7 @@ jobs:
         chk_var_must_set "$MYSQL_APP_LABEL" '##vso[task.logissue type=error]Variable "MYSQL_APP_LABEL" is not set'
         chk_var_must_set "$BOOKSTACK_APP_LABEL" '##vso[task.logissue type=error]Variable "BOOKSTACK_APP_LABEL" is not set'
         chk_var_must_set "$BLOB_CONTAINER_NAME" '##vso[task.logissue type=error]Variable "BLOB_CONTAINER_NAME" is not set'
-        chk_var_must_set "$STORAGE_ACCOUNT_NAME '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set'
+        chk_var_must_set "$STORAGE_ACCOUNT_NAME" '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set'
 
         if [ "$passed" = "false" ]; then
           echo '##vso[task.logissue type=error]Missing one or more required variable(s).'
