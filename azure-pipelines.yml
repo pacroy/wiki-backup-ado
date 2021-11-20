@@ -79,7 +79,7 @@ jobs:
         curl -fsSLO "${kubelogin_download_url}"
         unzip kubelogin-linux-amd64.zip > /dev/null
         sudo install -o root -g root -m 0755 ./bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
-        
+
         echo "kubelogin instslled at $(command -v kubelogin)"
         kubelogin --version
   - task: Bash@3
@@ -87,11 +87,13 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        command -v az
+        echo "[$(command -v az)]"
         az version
-        command -v kubectl
+        echo
+        echo "[$(command -v kubectl)]"
         kubectl version --client=true
-        command -v kubelogin
+        echo
+        echo "[$(command -v kubelogin)]"
         kubelogin --version
   - task: Bash@3
     displayName: 'Preparation'
