@@ -100,7 +100,11 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+        backup_script_url="https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh"
+        echo "Downloading backup script from $backup_script_url ..."
+        curl -fsSL "$backup_script_url" -o backup.sh
+
+        echo "Creating backup directory ..."
         mkdir -p backup
   - task: Bash@3
     displayName: 'Login Kubernetes'
