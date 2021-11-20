@@ -72,6 +72,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+        
         kubelogin_latest_tag=$(curl -fsSL https://api.github.com/repos/Azure/kubelogin/releases/latest | jq -r '.tag_name')
         kubelogin_download_url="https://github.com/Azure/kubelogin/releases/download/${kubelogin_latest_tag}/kubelogin-linux-amd64.zip"
 
@@ -87,6 +90,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+
         echo "[$(command -v az)]"
         az version
         echo
@@ -100,6 +106,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+
         backup_script_url="https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh"
         echo "Downloading backup script from $backup_script_url ..."
         curl -fsSL "$backup_script_url" -o backup.sh
@@ -111,6 +120,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+
         echo "$(KUBE_CA_BASE64)" | base64 -d > cert.pem
         kubectl config set-cluster "${KUBE_CONTEXT}" --server "${KUBE_API_SERVER}" --embed-certs --certificate-authority=cert.pem
 
@@ -155,6 +167,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+
         az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
         if [ -n "${STORAGE_SUBSCRIPTION_ID}" ]; then az account set --subscription "${STORAGE_SUBSCRIPTION_ID}"; fi
         BLOB_PREFIX=$(date +%Y%m%d)
@@ -181,6 +196,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+
         kubectl config delete-context "${KUBE_CONTEXT}"
         kubectl config delete-user "clusterUser_${KUBE_CONTEXT}"
         kubectl config delete-cluster "${KUBE_CONTEXT}"
