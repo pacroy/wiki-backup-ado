@@ -34,58 +34,95 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        if [ -z "$TENANT_ID" ]; then echo '##vso[task.logissue type=error]Variable "TENANT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$SERVICE_PRINCIPAL_ID" ]; then echo '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$SERVICE_PRINCIPAL_SECRET" ]; then echo '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_SECRET" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        set -o errexit
+        set -o pipefail
 
-        if [ -z "$KUBE_CA_BASE64" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$KUBE_API_SERVER" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_API_SERVER" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        chk_var_must_set() {
+          if [ -z "$1" ]; then echo "$2" && passed="false"; fi
+        }
+
+        chk_var_must_set "$TENANT_ID" '##vso[task.logissue type=error]Variable "TENANT_ID" is not set'
+        chk_var_must_set "$SERVICE_PRINCIPAL_ID" '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_ID" is not set'
+        chk_var_must_set "$SERVICE_PRINCIPAL_SECRET" '##vso[task.logissue type=error]Variable "SERVICE_PRINCIPAL_SECRET" is not set'
+
+        chk_var_must_set "$KUBE_CA_BASE64" '##vso[task.logissue type=error]Variable "KUBE_CA_BASE64" is not set'
+        chk_var_must_set "$KUBE_API_SERVER" '##vso[task.logissue type=error]Variable "KUBE_API_SERVER" is not set'
 
         if [ -n "$KUBE_SERVER_ID" ]; then
-          if [ -z "$KUBE_CLIENT_ID" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+          chk_var_must_set "$KUBE_CLIENT_ID" '##vso[task.logissue type=error]Variable "KUBE_CLIENT_ID" is not set'
         else
-          if [ -z "$KUBE_USER_TOKEN" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_USER_TOKEN" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+          chk_var_must_set "$KUBE_USER_TOKEN" '##vso[task.logissue type=error]Variable "KUBE_USER_TOKEN" is not set'
         fi
 
-        if [ -z "$KUBE_CONTEXT" ]; then echo '##vso[task.logissue type=error]Variable "KUBE_CONTEXT" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$WIKI_NAMSPACE" ]; then echo '##vso[task.logissue type=error]Variable "WIKI_NAMSPACE" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$MYSQL_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "MYSQL_APP_LABEL" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$BOOKSTACK_APP_LABEL" ]; then echo '##vso[task.logissue type=error]Variable "BOOKSTACK_APP_LABEL" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$BLOB_CONTAINER_NAME" ]; then echo '##vso[task.logissue type=error]Variable "BLOB_CONTAINER_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
-        if [ -z "$STORAGE_ACCOUNT_NAME" ]; then echo '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set' && echo '##vso[task.complete result=Failed;]DONE'; fi
+        chk_var_must_set "$KUBE_CONTEXT" '##vso[task.logissue type=error]Variable "KUBE_CONTEXT" is not set'
+        chk_var_must_set "$WIKI_NAMSPACE" '##vso[task.logissue type=error]Variable "WIKI_NAMSPACE" is not set'
+        chk_var_must_set "$MYSQL_APP_LABEL" '##vso[task.logissue type=error]Variable "MYSQL_APP_LABEL" is not set'
+        chk_var_must_set "$BOOKSTACK_APP_LABEL" '##vso[task.logissue type=error]Variable "BOOKSTACK_APP_LABEL" is not set'
+        chk_var_must_set "$BLOB_CONTAINER_NAME" '##vso[task.logissue type=error]Variable "BLOB_CONTAINER_NAME" is not set'
+        chk_var_must_set "$STORAGE_ACCOUNT_NAME '##vso[task.logissue type=error]Variable "STORAGE_ACCOUNT_NAME" is not set'
+
+        if [ "$passed" = "false" ]; then
+          echo '##vso[task.logissue type=error]Missing one or more required variable(s).'
+          echo '##vso[task.complete result=Failed;]DONE'
+        else
+          echo 'All required variables are set.'
+        fi
   - task: Bash@3
     displayName: 'Install kubelogin'
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+        
         kubelogin_latest_tag=$(curl -fsSL https://api.github.com/repos/Azure/kubelogin/releases/latest | jq -r '.tag_name')
         kubelogin_download_url="https://github.com/Azure/kubelogin/releases/download/${kubelogin_latest_tag}/kubelogin-linux-amd64.zip"
+
+        echo "Downloading kubelogin from $kubelogin_download_url ..."
         curl -fsSLO "${kubelogin_download_url}"
-        unzip kubelogin-linux-amd64.zip
+        unzip kubelogin-linux-amd64.zip > /dev/null
         sudo install -o root -g root -m 0755 ./bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
+
+        echo "kubelogin instslled at $(command -v kubelogin)"
+        kubelogin --version
   - task: Bash@3
     displayName: 'Print Tool Version'
     inputs:
       targetType: 'inline'
       script: |
-        command -v az
+        set -o errexit
+        set -o pipefail
+
+        echo "[$(command -v az)]"
         az version
-        command -v kubectl
+        echo
+        echo "[$(command -v kubectl)]"
         kubectl version --client=true
-        command -v kubelogin
+        echo
+        echo "[$(command -v kubelogin)]"
         kubelogin --version
   - task: Bash@3
     displayName: 'Preparation'
     inputs:
       targetType: 'inline'
       script: |
-        curl -fsSL https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh -o backup.sh
+        set -o errexit
+        set -o pipefail
+
+        backup_script_url="https://raw.githubusercontent.com/pacroy/bookstack-backup/master/backup.sh"
+        echo "Downloading backup script from $backup_script_url ..."
+        curl -fsSL "$backup_script_url" -o backup.sh
+
+        echo "Creating backup directory ..."
         mkdir -p backup
   - task: Bash@3
     displayName: 'Login Kubernetes'
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+
         echo "$(KUBE_CA_BASE64)" | base64 -d > cert.pem
         kubectl config set-cluster "${KUBE_CONTEXT}" --server "${KUBE_API_SERVER}" --embed-certs --certificate-authority=cert.pem
 
@@ -109,6 +146,7 @@ jobs:
           export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET="$(SERVICE_PRINCIPAL_SECRET)"
         fi
 
+        echo
         kubectl version
   - task: Bash@3
     displayName: 'Execute Backup Script'
@@ -130,32 +168,46 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)"
+        set -o errexit
+        set -o pipefail
+
+        echo "Logging in Azure ..."
+        az login --service-principal --tenant "${TENANT_ID}" --username "${SERVICE_PRINCIPAL_ID}" --password "$(SERVICE_PRINCIPAL_SECRET)" --output table
         if [ -n "${STORAGE_SUBSCRIPTION_ID}" ]; then az account set --subscription "${STORAGE_SUBSCRIPTION_ID}"; fi
+
         BLOB_PREFIX=$(date +%Y%m%d)
+        echo "Uploading Bookstack database backup file ..."
         az storage blob upload \
           --container-name "$BLOB_CONTAINER_NAME" \
           --file 'backup/bookstack.sql' \
           --name "$BLOB_PREFIX/bookstack.sql" \
           --account-name "$STORAGE_ACCOUNT_NAME" \
-          --auth-mode key --only-show-errors --no-progress
+          --auth-mode key --only-show-errors
+        echo
+          echo "Uploading Bookstack upload backup file ..."
         az storage blob upload \
           --container-name "$BLOB_CONTAINER_NAME" \
           --file 'backup/uploads.tgz' \
           --name "$BLOB_PREFIX/uploads.tgz" \
           --account-name "$STORAGE_ACCOUNT_NAME" \
-          --auth-mode key --only-show-errors --no-progress
+          --auth-mode key --only-show-errors
+        echo
+        echo "Uploading Bookstack storage backup file ..."
         az storage blob upload \
           --container-name "$BLOB_CONTAINER_NAME" \
           --file 'backup/storage.tgz' \
           --name "$BLOB_PREFIX/storage.tgz" \
           --account-name "$STORAGE_ACCOUNT_NAME" \
-          --auth-mode key --only-show-errors --no-progress
+          --auth-mode key --only-show-errors
   - task: Bash@3
     displayName: 'Clean up'
     inputs:
       targetType: 'inline'
       script: |
+        set -o errexit
+        set -o pipefail
+
+        echo "Cleaning up ..."
         kubectl config delete-context "${KUBE_CONTEXT}"
         kubectl config delete-user "clusterUser_${KUBE_CONTEXT}"
         kubectl config delete-cluster "${KUBE_CONTEXT}"
