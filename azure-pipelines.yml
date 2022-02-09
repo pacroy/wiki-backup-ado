@@ -202,12 +202,10 @@ jobs:
           --auth-mode key --only-show-errors
   - task: Bash@3
     displayName: 'Clean up'
+    continueOnError: true
     inputs:
       targetType: 'inline'
       script: |
-        set -o errexit
-        set -o pipefail
-
         echo "Cleaning up ..."
         kubectl config delete-context "${KUBE_CONTEXT}"
         kubectl config delete-user "clusterUser_${KUBE_CONTEXT}"
