@@ -1,3 +1,7 @@
+![deprecated](https://img.shields.io/badge/-deprecated-red) ![deprecated](https://img.shields.io/badge/-deprecated-red) ![deprecated](https://img.shields.io/badge/-deprecated-red)
+
+> ⚠️ This repository is deprecated and will no longer be maintained. Please switch to GitHub Actions pipelines in [this repository](https://github.com/pacroy/bookstack-backup). ⚠️
+
 # Bookstack Backup using Azure Pipelines
 
 Azure DevOps pipelines to make a backup of Bookstack application deployed on a Kubernetes cluster using [this Helm chart](https://github.com/pacroy/bookstack-helm) and upload backup archives to Azure storage account.
